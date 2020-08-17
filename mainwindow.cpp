@@ -1,5 +1,6 @@
 ﻿#include "mainwindow.h"
 #include "notificationwidget.h"
+#include "settings.h"
 #include "ui_mainwindow.h"
 #include <QCoreApplication>
 #include <QFileDialog>
@@ -11,26 +12,33 @@
 #include <QTimer>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QAction>
 #include <QProgressBar>
 #include <QProcess>
+#include <QSettings>
 #include <QtNetwork/QNetworkAccessManager>
+#include <settingkeys.h>
 
-#define FILENAME_COL 0
-#define TRACKING_ID_COL 1
-#define PG_BAR_COL 2
-#define OPEN_DIR_COL 3
+#define FILENAME_COL          0
+#define TRACKING_ID_COL       1
+#define PG_BAR_COL            2
+#define OPEN_DIR_COL          3
 #define TRANSCRIPT_STATUS_COL 4
+#define NUM_OF_COLS           5
 
-#define STATUS_REQUEST_URL "http://localhost:5000/dumpstate"
-#define SUBMIT_URL "http://localhost:5000/submit-async"
-#define REQUEST_TRANSCRIPT_URL "http://localhost:5000/transcript"
-#define TRANSCRIPT_TARGET_DIR "."
+#define STATUS_REQUEST_URL      "http://localhost:5000/dumpstate"
+#define SUBMIT_URL              "http://localhost:5000/submit-async"
+#define REQUEST_TRANSCRIPT_URL  "http://localhost:5000/transcript"
+#define TRANSCRIPT_TARGET_DIR   "."
+
 
 MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow){
 
     /* setup ui */
     ui->setupUi(this);
 
+    /* ensure all initial settings are set */
+    handleInitialSettings();
 
     setAuthHeader("user", "pass");
     networkManager = new QNetworkAccessManager(this);
@@ -47,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     tw->horizontalHeader()->setVisible(false);
     tw->setRowCount(0);
     /* FILE | trackingId | STATUS | open dir | download completed? true/false | */
-    tw->setColumnCount(5);
+    tw->setColumnCount(NUM_OF_COLS);
     tw->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     tw->setColumnHidden(TRANSCRIPT_STATUS_COL, true);
 
@@ -63,14 +71,54 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(queryStatusAll()));
     timer->start(1000);
+
+    /* add handler for menu configuration */
+    ui->menuKonfiguration->addAction("Standards", this, SLOT(openConfigurationWindow()) );
+
+}
+
+void MainWindow::openConfigurationWindow(){
+    Settings *settingsWindow = new Settings();
+    settingsWindow->show();
+}
+
+void MainWindow::handleInitialSettings(){
+    QSettings mySettings;
+    if(!mySettings.contains(SETTING_HOST)){
+        mySettings.setValue(SETTING_HOST, "localhost");
+    }
+    if(!mySettings.contains(SETTING_PORT)){
+        mySettings.setValue(SETTING_PORT, "5000");
+    }
+    if(!mySettings.contains(SETTING_PROTO)){
+        mySettings.setValue(SETTING_PROTO, "https://");
+    }
+    if(!mySettings.contains(SETTING_LOC_STATE)){
+        mySettings.setValue(SETTING_LOC_STATE, "/dumpstate");
+    }
+    if(!mySettings.contains(SETTING_LOC_SUBMIT)){
+        mySettings.setValue(SETTING_LOC_SUBMIT, "/submit-async");
+    }
+    if(!mySettings.contains(SETTING_LOC_TRANSCRIPT)){
+        mySettings.setValue(SETTING_LOC_TRANSCRIPT, "/transcript");
+    }
+    if(!mySettings.contains(SETTING_SAVE_DIR)){
+        mySettings.setValue(SETTING_SAVE_DIR, ".");
+    }
+    if(!mySettings.contains(SETTING_USER)){
+        mySettings.setValue(SETTING_USER, "");
+    }
+    if(!mySettings.contains(SETTING_PASS)){
+        mySettings.setValue(SETTING_PASS, "");
+    }
 }
 
 void MainWindow::importFile(){
     QString filename =  QFileDialog::getOpenFileName(
-          this,
-          "Open Document",
-          QDir::currentPath(),
-          "All files (*.*) ;; Document files (*.doc *.rtf);; PNG files (*.png)");
+                this,
+                "Open Document",
+                QDir::currentPath(),
+                "All files (*.*) ;; Document files (*.doc *.rtf);; PNG files (*.png)");
 
     if(filename.isNull()){
         return;
@@ -80,9 +128,9 @@ void MainWindow::importFile(){
 }
 
 void MainWindow::showNotification(QString str){
-    #ifdef Q_OS_LINUX
+#ifdef Q_OS_LINUX
     return;
-    #endif
+#endif
     auto popUp = new NotificationWidget(this);
     popUp->setPopupText(str);
     popUp->setGeometry(0, 0, popUp->width(), popUp->height());
@@ -127,7 +175,7 @@ void MainWindow::submitFile(QString filename){
 
     /* make request */
     connect(networkManager, SIGNAL(finished(QNetworkReply*)), this,
-                    SLOT(requestFinished(QNetworkReply*)), Qt::UniqueConnection);
+            SLOT(requestFinished(QNetworkReply*)), Qt::UniqueConnection);
     networkManager->post(request, QJsonDocument(json).toJson());
 
     qDebug("Request submitted");
@@ -145,15 +193,15 @@ void MainWindow::openContainingDir(){
     qDebug("Called");
     auto filePath = TRANSCRIPT_TARGET_DIR;
     QStringList args;
-    #ifdef Q_OS_LINUX
+#ifdef Q_OS_LINUX
     args << QDir::toNativeSeparators(filePath);
     QProcess::startDetached("/usr/bin/thunar", args);
-    #endif
-    #ifdef Q_OS_WIN
+#endif
+#ifdef Q_OS_WIN
     QStringList args;
     args << "/select," << QDir::toNativeSeparators(filePath);
     QProcess::startDetached("explorer", args);
-    #endif
+#endif
 }
 
 void MainWindow::updateList(QNetworkReply* reply){

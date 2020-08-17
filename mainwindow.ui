@@ -40,8 +40,6 @@
     <property name="title">
      <string>&amp;Konfiguration</string>
     </property>
-    <addaction name="actionServer"/>
-    <addaction name="actionStandards"/>
    </widget>
    <addaction name="menuKonfiguration"/>
   </widget>
@@ -55,12 +53,12 @@
   </widget>
   <action name="actionServer">
    <property name="text">
-    <string>Server</string>
+    <string>&amp;Server</string>
    </property>
   </action>
   <action name="actionStandards">
    <property name="text">
-    <string>Standards</string>
+    <string>Sta&amp;ndards</string>
    </property>
   </action>
  </widget>

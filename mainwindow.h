@@ -23,10 +23,12 @@ private slots:
     void requestFinished(QNetworkReply*);
     void queryStatusAll();
     void openContainingDir();
+    void openConfigurationWindow();
 private:
     Ui::MainWindow *ui;
     QTableWidget *tw;
     QPushButton *button;
+    QAction *standardsMenu;
     QByteArray authHeaderData;
     QNetworkAccessManager *networkManager;
     void submitFile(QString filename);
@@ -36,6 +38,7 @@ private:
     void showNotification(QString str);
     void queryTransscript(QString trackingId);
     void saveTranscript(QNetworkReply *reply);
+    void handleInitialSettings();
 };
 
 #endif // MAINWINDOW_H

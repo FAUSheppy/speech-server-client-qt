@@ -27,14 +27,18 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    notificationwidget.cpp
+    notificationwidget.cpp \
+    settings.cpp
 
 HEADERS += \
         mainwindow.h \
-    notificationwidget.h
+    notificationwidget.h \
+    settings.h \
+    settingkeys.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    settings.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
