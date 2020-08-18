@@ -10,5 +10,6 @@
 #define SETTING_SAVE_DIR        "save-dir"
 #define SETTING_USER            "user"
 #define SETTING_PASS            "pass"
+#define SETTING_LINUX_EXPLORER  "linux-explorer"
 
 #endif // SETTINGKEYS_H

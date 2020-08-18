@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QNetworkReply>
 #include <QPushButton>
+#include <QSettings>
 #include <QTableWidget>
 
 namespace Ui {
@@ -31,6 +32,7 @@ private:
     QAction *standardsMenu;
     QByteArray authHeaderData;
     QNetworkAccessManager *networkManager;
+    QSettings mySettings;
     void submitFile(QString filename);
     void setAuthHeader(const QString username, const QString password);
     void updateList(QNetworkReply *reply);
@@ -39,6 +41,8 @@ private:
     void queryTransscript(QString trackingId);
     void saveTranscript(QNetworkReply *reply);
     void handleInitialSettings();
+    QString buildURLFromLocation(QString location);
+    QString buildURLFromLocation(QVariant location);
 };
 
 #endif // MAINWINDOW_H

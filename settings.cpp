@@ -24,6 +24,10 @@ Settings::Settings(QWidget *parent) :
     configOptions->append("Username");
     configOptions->append("Passwort");
 
+    #ifdef Q_OS_LINUX
+        configOptions->append("Linux Explorer");
+    #endif
+
     /* config option keys */
     QStringList *configOptionsKeys = new QStringList();
     configOptionsKeys->append(SETTING_HOST);
@@ -32,6 +36,9 @@ Settings::Settings(QWidget *parent) :
     configOptionsKeys->append(SETTING_SAVE_DIR);
     configOptionsKeys->append(SETTING_USER);
     configOptionsKeys->append(SETTING_PASS);
+    #ifdef Q_OS_LINUX
+        configOptionsKeys->append(SETTING_LINUX_EXPLORER);
+    #endif
 
     /* config options layout */
     auto cw = this->findChild<QWidget*>("centralwidget");

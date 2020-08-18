@@ -17,6 +17,7 @@
 #include <QProcess>
 #include <QSettings>
 #include <QtNetwork/QNetworkAccessManager>
+#include <QString>
 #include <settingkeys.h>
 
 #define FILENAME_COL          0
@@ -25,11 +26,6 @@
 #define OPEN_DIR_COL          3
 #define TRANSCRIPT_STATUS_COL 4
 #define NUM_OF_COLS           5
-
-#define STATUS_REQUEST_URL      "http://localhost:5000/dumpstate"
-#define SUBMIT_URL              "http://localhost:5000/submit-async"
-#define REQUEST_TRANSCRIPT_URL  "http://localhost:5000/transcript"
-#define TRANSCRIPT_TARGET_DIR   "."
 
 
 MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow){
@@ -40,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     /* ensure all initial settings are set */
     handleInitialSettings();
 
-    setAuthHeader("user", "pass");
+    setAuthHeader(mySettings.value(SETTING_USER).toString(), mySettings.value(SETTING_PASS).toString());
     networkManager = new QNetworkAccessManager(this);
 
     /* setup buttons */
@@ -83,7 +79,7 @@ void MainWindow::openConfigurationWindow(){
 }
 
 void MainWindow::handleInitialSettings(){
-    QSettings mySettings;
+
     if(!mySettings.contains(SETTING_HOST)){
         mySettings.setValue(SETTING_HOST, "localhost");
     }
@@ -110,6 +106,9 @@ void MainWindow::handleInitialSettings(){
     }
     if(!mySettings.contains(SETTING_PASS)){
         mySettings.setValue(SETTING_PASS, "");
+    }
+    if(!mySettings.contains(SETTING_LINUX_EXPLORER)){
+        mySettings.setValue(SETTING_LINUX_EXPLORER, "/usr/bin/thunar");
     }
 }
 
@@ -150,17 +149,36 @@ void MainWindow::setAuthHeader(const QString username, const QString password){
 
 }
 
+QString MainWindow::buildURLFromLocation(QVariant location){
+    return buildURLFromLocation(location.toString());
+}
+
+QString MainWindow::buildURLFromLocation(QString location){
+    QString proto = mySettings.value(SETTING_PROTO).toString();
+    QString host = mySettings.value(SETTING_HOST).toString();
+    QString port = mySettings.value(SETTING_PORT).toString();
+    if(!proto.endsWith("://")){
+        proto += "://";
+    }
+    if(!port.startsWith(":")){
+        port = ":" + port;
+    }
+    QString url = proto + host + port + location;
+    qDebug(qPrintable(url));
+    return url;
+}
+
 void MainWindow::submitFile(QString filename){
 
     /* prepare request */
-    QUrl serviceUrl = QUrl(SUBMIT_URL);
+    QUrl serviceUrl = QUrl(buildURLFromLocation(mySettings.value(SETTING_LOC_SUBMIT)));
     QNetworkRequest request(serviceUrl);
     request.setRawHeader("Authorization", authHeaderData);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     /* read audio as base64 */
     QFile sourceFile(filename);
-    sourceFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    sourceFile.open(QIODevice::ReadOnly);
     QByteArray base64Encoded = sourceFile.readAll().toBase64();
     QString dataString = QString::fromUtf8(base64Encoded);
     sourceFile.close();
@@ -182,26 +200,29 @@ void MainWindow::submitFile(QString filename){
 }
 
 void MainWindow::queryTransscript(QString trackingId){
-    QString url = QString("%1?id=%2").arg(REQUEST_TRANSCRIPT_URL, trackingId);
-    QUrl transcriptUrl = QUrl(url);
+    QString url = buildURLFromLocation(mySettings.value(SETTING_LOC_TRANSCRIPT));
+    QString paramUrl = QString("%1?id=%2").arg(url, trackingId);
+    QUrl transcriptUrl = QUrl(paramUrl);
     QNetworkRequest request(transcriptUrl);
     request.setRawHeader("Authorization", authHeaderData);
     networkManager->get(request);
 }
 
 void MainWindow::openContainingDir(){
-    qDebug("Called");
-    auto filePath = TRANSCRIPT_TARGET_DIR;
+
+    QString filePath = mySettings.value(SETTING_SAVE_DIR).toString();
     QStringList args;
-#ifdef Q_OS_LINUX
-    args << QDir::toNativeSeparators(filePath);
-    QProcess::startDetached("/usr/bin/thunar", args);
-#endif
-#ifdef Q_OS_WIN
-    QStringList args;
-    args << "/select," << QDir::toNativeSeparators(filePath);
-    QProcess::startDetached("explorer", args);
-#endif
+
+    /* OS specific explorer call */
+    #ifdef Q_OS_LINUX
+        args << QDir::toNativeSeparators(filePath);
+        QProcess::startDetached(mySettings.value(SETTING_LINUX_EXPLORER).toString(), args);
+    #endif
+    #ifdef Q_OS_WIN
+        QStringList args;
+        args << "/select," << QDir::toNativeSeparators(filePath);
+        QProcess::startDetached("explorer", args);
+    #endif
 }
 
 void MainWindow::updateList(QNetworkReply* reply){
@@ -273,15 +294,17 @@ void MainWindow::saveTranscript(QNetworkReply* reply){
     }
 
     /* save return data */
-    QString fullpath = QDir(TRANSCRIPT_TARGET_DIR).filePath(targetName);
+    QString fullpath = QDir(mySettings.value(SETTING_SAVE_DIR).toString()).filePath(targetName);
     qDebug(qPrintable(fullpath));
+    qDebug(qPrintable(transcript));
     QFile file(fullpath);
     if (!file.open(QIODevice::WriteOnly)) {
         QMessageBox::information(this, tr("Unable to open file"), file.errorString());
         qWarning("Error opening File");
     }
-    QDataStream out(&file);
-    out.setVersion(QDataStream::Qt_4_5);
+    QTextStream out(&file);
+    out.setGenerateByteOrderMark(true);
+    out.setCodec("UTF-8");
     out << transcript;
     file.close();
 
@@ -352,22 +375,28 @@ void MainWindow::addTrackingToList(QNetworkReply* reply){
 
 void MainWindow::requestFinished(QNetworkReply *reply){
     qDebug(qPrintable(reply->url().toString()));
-    if(QString::compare(reply->url().toString(), SUBMIT_URL) == 0){
+
+    QString submitUrl = buildURLFromLocation(mySettings.value(SETTING_LOC_SUBMIT));
+    QString statusRequestUrl = buildURLFromLocation(mySettings.value(SETTING_LOC_STATE));
+    QString requestTranscriptUrl = buildURLFromLocation(mySettings.value(SETTING_LOC_TRANSCRIPT));
+
+    if(QString::compare(reply->url().toString(), submitUrl) == 0){
         addTrackingToList(reply);
-    }else if (QString::compare(reply->url().toString(), STATUS_REQUEST_URL) == 0) {
+    }else if (QString::compare(reply->url().toString(), statusRequestUrl) == 0) {
         updateList(reply);
-    }else if (reply->url().toString().startsWith(REQUEST_TRANSCRIPT_URL)) {
+    }else if (reply->url().toString().startsWith(requestTranscriptUrl)) {
         qDebug("Saving transcript");
         saveTranscript(reply);
     }else{
         qDebug("URL-Response: %s", qUtf8Printable(reply->url().toString()));
         qFatal("Unexpected responding URL");
     }
-    //qDebug("Reply handling finished");
 }
 
 void MainWindow::queryStatusAll(){
-    QUrl trackingUrl = QUrl(STATUS_REQUEST_URL);
+
+    QString statusRequestUrl = buildURLFromLocation(mySettings.value(SETTING_LOC_STATE));
+    QUrl trackingUrl = QUrl(statusRequestUrl);
     QNetworkRequest request(trackingUrl);
     request.setRawHeader("Authorization", authHeaderData);
     networkManager->get(request);
