@@ -147,9 +147,7 @@ void MainWindow::importFile(){
 }
 
 void MainWindow::showNotification(QString str){
-#ifdef Q_OS_LINUX
-    return;
-#endif
+
     auto popUp = new NotificationWidget(this);
     popUp->setPopupText(str);
     popUp->setGeometry(0, 0, popUp->width(), popUp->height());
@@ -390,7 +388,6 @@ void MainWindow::addTrackingToList(QNetworkReply* reply){
 }
 
 void MainWindow::requestFinished(QNetworkReply *reply){
-    qDebug(qPrintable(reply->url().toString()));
 
     QString submitUrl = buildURLFromLocation(mySettings->value(SETTING_LOC_SUBMIT));
     QString statusRequestUrl = buildURLFromLocation(mySettings->value(SETTING_LOC_STATE));
