@@ -88,7 +88,14 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
 void MainWindow::openConfigurationWindow(){
     Settings *settingsWindow = new Settings();
     settingsWindow->selectSettings(this->mySettings);
+    settingsWindow->setAttribute(Qt::WA_DeleteOnClose);
+    connect(settingsWindow, SIGNAL(destroyed()), this, SLOT(appyConfigChanges()));
     settingsWindow->show();
+}
+
+void MainWindow::appyConfigChanges(){
+    setAuthHeader(mySettings->value(SETTING_USER).toString(), mySettings->value(SETTING_PASS).toString());
+    networkManager = new QNetworkAccessManager(this);
 }
 
 void MainWindow::handleInitialSettings(){

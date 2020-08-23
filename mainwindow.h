@@ -25,6 +25,7 @@ private slots:
     void queryStatusAll();
     void openContainingDir();
     void openConfigurationWindow();
+    void appyConfigChanges();
 private:
     Ui::MainWindow *ui;
     QTableWidget *tw;
