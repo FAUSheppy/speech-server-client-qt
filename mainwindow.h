@@ -32,7 +32,7 @@ private:
     QAction *standardsMenu;
     QByteArray authHeaderData;
     QNetworkAccessManager *networkManager;
-    QSettings mySettings;
+    QSettings *mySettings;
     void submitFile(QString filename);
     void setAuthHeader(const QString username, const QString password);
     void updateList(QNetworkReply *reply);

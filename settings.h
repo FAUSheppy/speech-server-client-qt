@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QLineEdit>
+#include <QSettings>
 
 namespace Ui {
 class settings;
@@ -16,12 +17,16 @@ public:
     explicit Settings(QWidget *parent = nullptr);
     ~Settings();
 
+    void selectSettings(QSettings *selectedSettings);
 private slots:
     void okClose();
     void cancleClose();
 private:
     Ui::settings *ui;
+    QSettings  *mySettings;
     QHash<QString, QLineEdit*> *configLineEditMap;
+    QStringList *configOptionsKeys;
+    QStringList *configOptions;
 };
 
 #endif // SETTINGS_H

@@ -17,10 +17,9 @@ Settings::Settings(QWidget *parent) :
 {
     ui->setupUi(this);
     configLineEditMap = new QHash<QString, QLineEdit*>();
-    QSettings mySettings;
 
     /* config options */
-    QStringList *configOptions = new QStringList();
+    configOptions = new QStringList();
     configOptions->append("Host");
     configOptions->append("Port");
     configOptions->append("Protokoll");
@@ -33,7 +32,7 @@ Settings::Settings(QWidget *parent) :
     #endif
 
     /* config option keys */
-    QStringList *configOptionsKeys = new QStringList();
+    configOptionsKeys = new QStringList();
     configOptionsKeys->append(SETTING_HOST);
     configOptionsKeys->append(SETTING_PORT);
     configOptionsKeys->append(SETTING_PROTO);
@@ -43,6 +42,11 @@ Settings::Settings(QWidget *parent) :
     #ifdef Q_OS_LINUX
         configOptionsKeys->append(SETTING_LINUX_EXPLORER);
     #endif
+
+}
+
+void Settings::selectSettings(QSettings *selectedSettings){
+    this->mySettings = selectedSettings;
 
     /* config options layout */
     auto cw = this->findChild<QWidget*>("centralwidget");
@@ -54,7 +58,7 @@ Settings::Settings(QWidget *parent) :
         QLabel *label = new QLabel(this);
         label->setText(configOptions->at(i));
         QLineEdit *edit = new QLineEdit();
-        edit->setText(mySettings.value(configOptionsKeys->at(i)).toString());
+        edit->setText(this->mySettings->value(configOptionsKeys->at(i)).toString());
 
         /* add widgets to layout */
         layout->addWidget(label, i, 0);
@@ -91,7 +95,7 @@ void Settings::okClose(){
     for(auto key : configLineEditMap->keys()){
         QString input = configLineEditMap->take(key)->text();
         if(input.compare("") != 0){
-            mySettings.setValue(key, input);
+            this->mySettings->setValue(key, input);
         }
     }
     this->close();
