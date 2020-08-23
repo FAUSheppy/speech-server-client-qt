@@ -43,6 +43,7 @@ Settings::Settings(QWidget *parent) :
         configOptionsKeys->append(SETTING_LINUX_EXPLORER);
     #endif
 
+    this->setWindowTitle(SETTINGS_WINDOW_TITLE);
 }
 
 void Settings::selectSettings(QSettings *selectedSettings){
