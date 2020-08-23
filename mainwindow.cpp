@@ -177,7 +177,6 @@ QString MainWindow::buildURLFromLocation(QString location){
         port = ":" + port;
     }
     QString url = proto + host + port + location;
-    qDebug(qPrintable(url));
     return url;
 }
 
@@ -307,8 +306,6 @@ void MainWindow::saveTranscript(QNetworkReply* reply){
 
     /* save return data */
     QString fullpath = QDir(mySettings->value(SETTING_SAVE_DIR).toString()).filePath(targetName);
-    qDebug(qPrintable(fullpath));
-    qDebug(qPrintable(transcript));
     QFile file(fullpath);
     if (!file.open(QIODevice::WriteOnly)) {
         QMessageBox::information(this, tr("Unable to open file"), file.errorString());
