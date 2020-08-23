@@ -7,6 +7,10 @@
 #include <QSettings>
 #include <settingkeys.h>
 
+#define SETTINGS_WINDOW_TITLE "Konfiguration"
+#define BUTTON_TEXT_ABORT "Abbrechen"
+#define BUTTON_TEXT_OK    "OK"
+
 Settings::Settings(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::settings)
@@ -65,8 +69,8 @@ Settings::Settings(QWidget *parent) :
     }
 
     /* buttons */
-    auto ok = new QPushButton("Ok");
-    auto cancle = new QPushButton("Cancle");
+    auto ok = new QPushButton(BUTTON_TEXT_OK);
+    auto cancle = new QPushButton(BUTTON_TEXT_ABORT);
 
     layout->addWidget(ok, configOptions->length(), 0);
     layout->addWidget(cancle, configOptions->length(), 1);

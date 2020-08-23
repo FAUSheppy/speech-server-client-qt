@@ -27,6 +27,8 @@
 #define TRANSCRIPT_STATUS_COL 4
 #define NUM_OF_COLS           5
 
+#define WINDOW_TITLE "Memo Uploader"
+
 
 MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow){
 
@@ -70,6 +72,8 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     /* add handler for menu configuration */
     ui->menuKonfiguration->addAction("Standards", this, SLOT(openConfigurationWindow()) );
 
+    /* set window options */
+    this->setWindowTitle(WINDOW_TITLE);
 }
 
 void MainWindow::openConfigurationWindow(){
