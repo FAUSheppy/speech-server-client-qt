@@ -45,7 +45,6 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
 
     /* table ui */
     tw = ui->centralWidget->findChild<QTableWidget*>("tableWidget");
-    //QProgressBar *pgbar = new QProgressBar();
 
     tw->verticalHeader()->setVisible(false);
     tw->horizontalHeader()->setVisible(false);
