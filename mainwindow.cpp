@@ -219,7 +219,6 @@ void MainWindow::openContainingDir(){
         QProcess::startDetached(mySettings.value(SETTING_LINUX_EXPLORER).toString(), args);
     #endif
     #ifdef Q_OS_WIN
-        QStringList args;
         args << "/select," << QDir::toNativeSeparators(filePath);
         QProcess::startDetached("explorer", args);
     #endif
