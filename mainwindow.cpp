@@ -1,4 +1,5 @@
-﻿#include "mainwindow.h"
+﻿#include "about.h"
+#include "mainwindow.h"
 #include "notificationwidget.h"
 #include "settings.h"
 #include "ui_mainwindow.h"
@@ -20,6 +21,7 @@
 #include <QStandardPaths>
 #include <QString>
 #include <settingkeys.h>
+#include <serverconnection.h>
 
 #define FILENAME_COL          0
 #define TRACKING_ID_COL       1
@@ -47,8 +49,7 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
 
     handleInitialSettings();
 
-    setAuthHeader(mySettings->value(SETTING_USER).toString(), mySettings->value(SETTING_PASS).toString());
-    networkManager = new QNetworkAccessManager(this);
+    serverConnection = new ServerConnection(this, mySettings);
 
     /* setup buttons */
     button = ui->centralWidget->findChild<QPushButton*>("pushButton");
@@ -75,11 +76,12 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
 
     /* create status update timer */
     QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(queryStatusAll()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(queryStatusAllWrapper()));
     timer->start(1000);
 
     /* add handler for menu configuration */
     ui->menuKonfiguration->addAction("Standards", this, SLOT(openConfigurationWindow()) );
+    ui->menuKonfiguration->addAction("Über diese Software", this, SLOT(openAboutWindow()) );
 
     /* set window options */
     this->setWindowTitle(WINDOW_TITLE);
@@ -93,9 +95,14 @@ void MainWindow::openConfigurationWindow(){
     settingsWindow->show();
 }
 
+void MainWindow::openAboutWindow(){
+    About *aboutWindow = new About();
+    aboutWindow->setAttribute(Qt::WA_DeleteOnClose);
+    aboutWindow->show();
+}
+
 void MainWindow::appyConfigChanges(){
-    setAuthHeader(mySettings->value(SETTING_USER).toString(), mySettings->value(SETTING_PASS).toString());
-    networkManager = new QNetworkAccessManager(this);
+    serverConnection = new ServerConnection(this, mySettings);
 }
 
 void MainWindow::handleInitialSettings(){
@@ -142,7 +149,7 @@ void MainWindow::importFile(){
     if(filename.isNull()){
         return;
     }else{
-        submitFile(filename);
+        this->submitFileSlot(filename);
     }
 }
 
@@ -155,74 +162,7 @@ void MainWindow::showNotification(QString str){
     auto *timer = new QTimer();
     connect(timer, SIGNAL(timeout()), popUp, SLOT(fadeOut()));
     timer->start(5000);
-}
 
-void MainWindow::setAuthHeader(const QString username, const QString password){
-
-    /* prepare auth */
-    QString concatenated = username + ":" + password;
-    QByteArray data = concatenated.toLocal8Bit().toBase64();
-    QString authHeaderStr = "Basic " + data;
-    authHeaderData = authHeaderStr.toLocal8Bit();
-
-}
-
-QString MainWindow::buildURLFromLocation(QVariant location){
-    return buildURLFromLocation(location.toString());
-}
-
-QString MainWindow::buildURLFromLocation(QString location){
-    QString proto = mySettings->value(SETTING_PROTO).toString();
-    QString host = mySettings->value(SETTING_HOST).toString();
-    QString port = mySettings->value(SETTING_PORT).toString();
-    if(!proto.endsWith("://")){
-        proto += "://";
-    }
-    if(!port.startsWith(":")){
-        port = ":" + port;
-    }
-    QString url = proto + host + port + location;
-    return url;
-}
-
-void MainWindow::submitFile(QString filename){
-
-    /* prepare request */
-    QUrl serviceUrl = QUrl(buildURLFromLocation(mySettings->value(SETTING_LOC_SUBMIT)));
-    QNetworkRequest request(serviceUrl);
-    request.setRawHeader("Authorization", authHeaderData);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-
-    /* read audio as base64 */
-    QFile sourceFile(filename);
-    sourceFile.open(QIODevice::ReadOnly);
-    QByteArray base64Encoded = sourceFile.readAll().toBase64();
-    QString dataString = QString::fromUtf8(base64Encoded);
-    sourceFile.close();
-
-    /* prepare json */
-    QJsonObject json = QJsonObject();
-    QJsonValue dataFieldContent = QJsonValue(dataString);
-    QFileInfo info(filename);
-    QString basename(info.fileName());
-    json["filename"] = filename;
-    json["data"] = dataFieldContent;
-
-    /* make request */
-    connect(networkManager, SIGNAL(finished(QNetworkReply*)), this,
-            SLOT(requestFinished(QNetworkReply*)), Qt::UniqueConnection);
-    networkManager->post(request, QJsonDocument(json).toJson());
-
-    qDebug("Request submitted");
-}
-
-void MainWindow::queryTransscript(QString trackingId){
-    QString url = buildURLFromLocation(mySettings->value(SETTING_LOC_TRANSCRIPT));
-    QString paramUrl = QString("%1?id=%2").arg(url, trackingId);
-    QUrl transcriptUrl = QUrl(paramUrl);
-    QNetworkRequest request(transcriptUrl);
-    request.setRawHeader("Authorization", authHeaderData);
-    networkManager->get(request);
 }
 
 void MainWindow::openContainingDir(){
@@ -276,7 +216,7 @@ void MainWindow::updateList(QNetworkReply* reply){
                 auto status = tw->model()->data(tw->model()->index(i, TRANSCRIPT_STATUS_COL));
                 auto tStatus = status.toString().toInt();
                 if(tStatus == 0){
-                    queryTransscript(trackingId);
+                    serverConnection->queryTransscript(trackingId);
                 }
             }else{
                 pg->setValue(percentage);
@@ -387,11 +327,36 @@ void MainWindow::addTrackingToList(QNetworkReply* reply){
     qDebug("Reply added to be tracked by list");
 }
 
+void MainWindow::submitFileSlot(QString filename){
+
+    /* read audio as base64 */
+    QFile sourceFile(filename);
+    sourceFile.open(QIODevice::ReadOnly);
+    QByteArray base64Encoded = sourceFile.readAll().toBase64();
+    QString dataString = QString::fromUtf8(base64Encoded);
+    sourceFile.close();
+
+    /* prepare json */
+    QJsonObject json = QJsonObject();
+    QJsonValue dataFieldContent = QJsonValue(dataString);
+    QFileInfo info(filename);
+    QString basename(info.fileName());
+    json["filename"] = filename;
+    json["data"] = dataFieldContent;
+
+    /* make request */
+    connect(serverConnection->getNetworkManager(), SIGNAL(finished(QNetworkReply*)), this,
+            SLOT(requestFinished(QNetworkReply*)), Qt::UniqueConnection);
+    serverConnection->submitFile(QJsonDocument(json));
+
+    qDebug("Request submission requested");
+}
+
 void MainWindow::requestFinished(QNetworkReply *reply){
 
-    QString submitUrl = buildURLFromLocation(mySettings->value(SETTING_LOC_SUBMIT));
-    QString statusRequestUrl = buildURLFromLocation(mySettings->value(SETTING_LOC_STATE));
-    QString requestTranscriptUrl = buildURLFromLocation(mySettings->value(SETTING_LOC_TRANSCRIPT));
+    QString submitUrl = serverConnection->buildURLFromLocation(mySettings->value(SETTING_LOC_SUBMIT));
+    QString statusRequestUrl = serverConnection->buildURLFromLocation(mySettings->value(SETTING_LOC_STATE));
+    QString requestTranscriptUrl = serverConnection->buildURLFromLocation(mySettings->value(SETTING_LOC_TRANSCRIPT));
 
     if(QString::compare(reply->url().toString(), submitUrl) == 0){
         addTrackingToList(reply);
@@ -406,15 +371,10 @@ void MainWindow::requestFinished(QNetworkReply *reply){
     }
 }
 
-void MainWindow::queryStatusAll(){
-
-    QString statusRequestUrl = buildURLFromLocation(mySettings->value(SETTING_LOC_STATE));
-    QUrl trackingUrl = QUrl(statusRequestUrl);
-    QNetworkRequest request(trackingUrl);
-    request.setRawHeader("Authorization", authHeaderData);
-    networkManager->get(request);
-    //qDebug("Status query sent");
+void MainWindow::queryStatusAllWrapper(){
+    serverConnection->queryStatusAll();
 }
+
 
 MainWindow::~MainWindow()
 {

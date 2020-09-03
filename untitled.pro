@@ -28,13 +28,17 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     notificationwidget.cpp \
-    settings.cpp
+    settings.cpp \
+    about.cpp \
+    serverconnection.cpp
 
 HEADERS += \
         mainwindow.h \
     notificationwidget.h \
     settings.h \
-    settingkeys.h
+    settingkeys.h \
+    about.h \
+    serverconnection.h
 
 FORMS += \
         mainwindow.ui \
