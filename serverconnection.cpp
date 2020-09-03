@@ -8,7 +8,6 @@
 
 ServerConnection::ServerConnection(QObject *parent, QSettings *settings)
 {
-
     setAuthHeader(settings->value(SETTING_USER).toString(), settings->value(SETTING_PASS).toString());
     networkManager = new QNetworkAccessManager(parent);
     mySettings = settings;
@@ -74,6 +73,13 @@ void ServerConnection::submitFile(QJsonDocument jsonDocument){
     networkManager->post(request, jsonDocument.toJson());
 
     qDebug("Request submitted");
+}
+
+void ServerConnection::queryServerVersion(){
+    QUrl serviceUrl = QUrl(buildURLFromLocation(QString("/server-info")));
+    QNetworkRequest request(serviceUrl);
+    request.setRawHeader("Authorization", authHeaderData);
+    networkManager->get(request);
 }
 
 QNetworkAccessManager *ServerConnection::getNetworkManager(){

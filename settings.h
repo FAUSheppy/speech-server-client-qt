@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QLineEdit>
 #include <QSettings>
+#include <QNetworkReply>
 
 namespace Ui {
 class settings;
@@ -21,6 +22,8 @@ public:
 private slots:
     void okClose();
     void cancleClose();
+    void checkConfig();
+    void handleTestConnectionResult(QNetworkReply *reply);
 private:
     Ui::settings *ui;
     QSettings  *mySettings;

@@ -1,13 +1,22 @@
+#include "serverconnection.h"
 #include "settings.h"
 #include "ui_settings.h"
 
+#include <QDialog>
+#include <QFile>
+#include <QFileInfo>
+#include <QFileInfo>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMessageBox>
+#include <QNetworkReply>
+#include <QNetworkReply>
 #include <QPushButton>
 #include <QSettings>
 #include <settingkeys.h>
 
 #define SETTINGS_WINDOW_TITLE "Konfiguration"
+#define BUTTON_TEXT_CHECK "Konfiguration Testen"
 #define BUTTON_TEXT_ABORT "Abbrechen"
 #define BUTTON_TEXT_OK    "OK"
 
@@ -74,14 +83,58 @@ void Settings::selectSettings(QSettings *selectedSettings){
     }
 
     /* buttons */
+    auto check = new QPushButton(BUTTON_TEXT_CHECK);
     auto ok = new QPushButton(BUTTON_TEXT_OK);
     auto cancle = new QPushButton(BUTTON_TEXT_ABORT);
 
-    layout->addWidget(ok, configOptions->length(), 0);
-    layout->addWidget(cancle, configOptions->length(), 1);
+    layout->addWidget(check, configOptions->length(), 0);
+    layout->addWidget(ok, configOptions->length()+1, 0);
+    layout->addWidget(cancle, configOptions->length()+1, 1);
 
+    connect(check, SIGNAL(released()), this, SLOT(checkConfig()));
     connect(ok, SIGNAL(released()), this, SLOT(okClose()));
     connect(cancle, SIGNAL(released()), this, SLOT(cancleClose()));
+}
+
+void Settings::checkConfig(){
+    ServerConnection *sc = new ServerConnection(this, mySettings);
+    connect(sc->getNetworkManager(), SIGNAL(finished(QNetworkReply*)), this, SLOT(handleTestConnectionResult(QNetworkReply*)));
+    sc->queryServerVersion();
+}
+
+void Settings::handleTestConnectionResult(QNetworkReply* reply){
+    QString *dialogText;
+    bool error = false;
+
+    if(reply->error() != QNetworkReply::NoError){
+        dialogText = new QString(reply->errorString());
+        error = true;
+    }else {
+        dialogText = new QString("Verbinndung Ok");
+    }
+    #ifdef Q_OS_LINUX
+        auto *fi = new QFileInfo(mySettings->value(SETTING_LINUX_EXPLORER).toString());
+        if(!fi->isExecutable()){
+            dialogText->append("\nExplorer nicht ausführbar!");
+            error = true;
+        }
+    #endif
+
+    QLabel *testResult = new QLabel("Ok!");
+    testResult->setStyleSheet("QLabel { color : green; }");
+    if(error){
+        QMessageBox *info = new QMessageBox();
+        info->setAttribute(Qt::WA_DeleteOnClose);
+        info->setWindowTitle("Konfiguration - Fehler!");
+        info->setText(*dialogText);
+        info->show();
+        testResult = new QLabel("Konfigurationsfehler.");
+        testResult->setStyleSheet("QLabel { color : red; }");
+    }
+
+    auto cw = this->findChild<QWidget*>("centralwidget");
+    QGridLayout *layout = static_cast<QGridLayout*>(cw->layout());
+    layout->addWidget(testResult, configOptions->length(), 1);
 }
 
 void Settings::cancleClose(){

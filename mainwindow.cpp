@@ -96,7 +96,7 @@ void MainWindow::openConfigurationWindow(){
 }
 
 void MainWindow::openAboutWindow(){
-    About *aboutWindow = new About();
+    About *aboutWindow = new About(this, mySettings);
     aboutWindow->setAttribute(Qt::WA_DeleteOnClose);
     aboutWindow->show();
 }

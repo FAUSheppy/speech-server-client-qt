@@ -15,6 +15,7 @@ public:
     QString buildURLFromLocation(QVariant location);
     QString buildURLFromLocation(QString location);
     QNetworkAccessManager *getNetworkManager();
+    void queryServerVersion();
 public slots:
     void queryStatusAll();
 private slots:
