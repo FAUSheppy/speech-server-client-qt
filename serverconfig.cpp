@@ -54,7 +54,7 @@ ServerConfig::ServerConfig(QWidget *parent, QSettings *settings) : QMainWindow(p
     headerListContext->append("Ausdruck/Wort");
     headerListContext->append("Entfernen");
 
-    contextTable->setColumnCount(headerList->length());
+    contextTable->setColumnCount(headerListContext->length());
     contextTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     QPushButton *addNewContext = new QPushButton("Neuer Ausdruck");
@@ -87,6 +87,7 @@ QWidget* ServerConfig::loatListItemUiForm()
 
 void ServerConfig::finishedRequest(QNetworkReply *reply){
     if(reply->error() != QNetworkReply::NoError){
+        qDebug("unified sc fail..");
         return;
     }
 
@@ -97,10 +98,10 @@ void ServerConfig::finishedRequest(QNetworkReply *reply){
     auto phrases = json["phrases"].toArray();
 
     contextTable->clear();
-    for(int i = 0; i < phrases.size(); i++){
-        contextTable->setItem(i, 0, new QTableWidgetItem(phrases.takeAt(i).toString()));
-        contextTable->setItem(i, 0, new QTableWidgetItem(phrases.takeAt(i).toString()));
 
+    for(int i = 0; i < phrases.size(); i++){
+        contextTable->insertRow(i);
+        contextTable->setItem(i, 0, new QTableWidgetItem(phrases.at(i).toString()));
         auto *deleteButtonLayout = new QGridLayout();
         auto *deleteCell = new QWidget();
         auto *deleteButton = new QPushButton("Entfernen");
@@ -111,7 +112,7 @@ void ServerConfig::finishedRequest(QNetworkReply *reply){
 
         contextTable->setCellWidget(i, 1, deleteCell);
     }
-
+    this->repaint();
 
 }
 
