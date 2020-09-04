@@ -29,6 +29,7 @@ private slots:
     void openConfigurationWindow();
     void appyConfigChanges();
     void openAboutWindow();
+    void openSpeechConfigWindow();
 private:
     Ui::MainWindow *ui;
     QTableWidget *tw;

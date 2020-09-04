@@ -5,6 +5,10 @@
 #include <QJsonObject>
 #include <QNetworkAccessManager>
 #include <QSettings>
+#include <urls.h>
+
+#define AUTH_HEADER_NAME "Authorization"
+#define MIME_JSON "application/json"
 
 ServerConnection::ServerConnection(QObject *parent, QSettings *settings)
 {
@@ -47,7 +51,7 @@ void ServerConnection::queryStatusAll(){
     QString statusRequestUrl = buildURLFromLocation(mySettings->value(SETTING_LOC_STATE));
     QUrl trackingUrl = QUrl(statusRequestUrl);
     QNetworkRequest request(trackingUrl);
-    request.setRawHeader("Authorization", authHeaderData);
+    request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
     networkManager->get(request);
     //qDebug("Status query sent");
 }
@@ -57,7 +61,7 @@ void ServerConnection::queryTransscript(QString trackingId){
     QString paramUrl = QString("%1?id=%2").arg(url, trackingId);
     QUrl transcriptUrl = QUrl(paramUrl);
     QNetworkRequest request(transcriptUrl);
-    request.setRawHeader("Authorization", authHeaderData);
+    request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
     networkManager->get(request);
 }
 
@@ -66,8 +70,8 @@ void ServerConnection::submitFile(QJsonDocument jsonDocument){
     /* prepare request */
     QUrl serviceUrl = QUrl(buildURLFromLocation(mySettings->value(SETTING_LOC_SUBMIT)));
     QNetworkRequest request(serviceUrl);
-    request.setRawHeader("Authorization", authHeaderData);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, MIME_JSON);
 
     /* make request */
     networkManager->post(request, jsonDocument.toJson());
@@ -76,12 +80,47 @@ void ServerConnection::submitFile(QJsonDocument jsonDocument){
 }
 
 void ServerConnection::queryServerVersion(){
-    QUrl serviceUrl = QUrl(buildURLFromLocation(QString("/server-info")));
+    QUrl serviceUrl = QUrl(buildURLFromLocation(QString(SERVER_INFO)));
     QNetworkRequest request(serviceUrl);
-    request.setRawHeader("Authorization", authHeaderData);
+    request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
     networkManager->get(request);
 }
 
 QNetworkAccessManager *ServerConnection::getNetworkManager(){
     return networkManager;
+}
+
+void ServerConnection::submitPostProcessorChange(QJsonDocument jsonDocument){
+    QUrl serviceUrl = QUrl(buildURLFromLocation(QString(PP_EDIT)));
+    QNetworkRequest request(serviceUrl);
+    request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
+    networkManager->post(request, jsonDocument.toJson());
+}
+
+void ServerConnection::submitSpeechContextPhraseChange(QJsonDocument jsonDocument){
+    QUrl serviceUrl = QUrl(buildURLFromLocation(QString(CONTEXT_EDIT)));
+    QNetworkRequest request(serviceUrl);
+    request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
+    networkManager->post(request, jsonDocument.toJson());
+}
+
+void ServerConnection::getSpeechContextPhrases(){
+    QUrl serviceUrl = QUrl(buildURLFromLocation(QString(CONTEXT_GET)));
+    QNetworkRequest request(serviceUrl);
+    request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
+    networkManager->get(request);
+}
+
+void ServerConnection::getPostProcessorMap(){
+    QUrl serviceUrl = QUrl(buildURLFromLocation(QString(PP_GET)));
+    QNetworkRequest request(serviceUrl);
+    request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
+    networkManager->get(request);
+}
+
+void ServerConnection::getUnifiedServerConfig(){
+    QUrl serviceUrl = QUrl(buildURLFromLocation(QString(UNIFIED_GET)));
+    QNetworkRequest request(serviceUrl);
+    request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
+    networkManager->get(request);
 }

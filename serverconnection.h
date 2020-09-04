@@ -16,6 +16,11 @@ public:
     QString buildURLFromLocation(QString location);
     QNetworkAccessManager *getNetworkManager();
     void queryServerVersion();
+    void getPostProcessorMap();
+    void submitPostProcessorChange(QJsonDocument jsonDocument);
+    void submitSpeechContextPhraseChange(QJsonDocument jsonDocument);
+    void getSpeechContextPhrases();
+    void getUnifiedServerConfig();
 public slots:
     void queryStatusAll();
 private slots:

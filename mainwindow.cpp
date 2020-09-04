@@ -1,6 +1,7 @@
 ﻿#include "about.h"
 #include "mainwindow.h"
 #include "notificationwidget.h"
+#include "serverconfig.h"
 #include "settings.h"
 #include "ui_mainwindow.h"
 #include <QCoreApplication>
@@ -80,11 +81,18 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     timer->start(1000);
 
     /* add handler for menu configuration */
+    ui->menuKonfiguration->addAction("Spracherkennung", this, SLOT(openSpeechConfigWindow()) );
     ui->menuKonfiguration->addAction("Konfiguration", this, SLOT(openConfigurationWindow()) );
     ui->menuKonfiguration->addAction("Über diese Software", this, SLOT(openAboutWindow()) );
 
     /* set window options */
     this->setWindowTitle(WINDOW_TITLE);
+}
+
+void MainWindow::openSpeechConfigWindow(){
+    ServerConfig *serverConfig = new ServerConfig(this, mySettings);
+    serverConfig->setAttribute(Qt::WA_DeleteOnClose);
+    serverConfig->show();
 }
 
 void MainWindow::openConfigurationWindow(){

@@ -1,6 +1,5 @@
 #include "about.h"
 #include "serverconnection.h"
-#include "ui_about.h"
 
 #include <QGridLayout>
 #include <QGroupBox>

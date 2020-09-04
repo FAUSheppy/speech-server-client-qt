@@ -8,7 +8,7 @@ GIT_STR_VERSION = $$system(git describe)
 DATE_STR = $$system(date)
 HOSTNAME_STR = $$system(hostname)
 
-QT       += core gui network
+QT       += core gui network uitools
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -37,7 +37,8 @@ SOURCES += \
     notificationwidget.cpp \
     settings.cpp \
     about.cpp \
-    serverconnection.cpp
+    serverconnection.cpp \
+    serverconfig.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -45,11 +46,14 @@ HEADERS += \
     settings.h \
     settingkeys.h \
     about.h \
-    serverconnection.h
+    serverconnection.h \
+    serverconfig.h \
+    urls.h
 
 FORMS += \
         mainwindow.ui \
-    settings.ui
+    listItemServeConfig.ui \
+    serverconfigitem.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
