@@ -12,7 +12,7 @@ QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = untitled
+TARGET = speech-server-client-qt
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
