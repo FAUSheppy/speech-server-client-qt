@@ -80,7 +80,7 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     timer->start(1000);
 
     /* add handler for menu configuration */
-    ui->menuKonfiguration->addAction("Standards", this, SLOT(openConfigurationWindow()) );
+    ui->menuKonfiguration->addAction("Konfiguration", this, SLOT(openConfigurationWindow()) );
     ui->menuKonfiguration->addAction("Über diese Software", this, SLOT(openAboutWindow()) );
 
     /* set window options */
