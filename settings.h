@@ -5,6 +5,7 @@
 #include <QLineEdit>
 #include <QSettings>
 #include <QNetworkReply>
+#include <QLabel>
 
 namespace Ui {
 class settings;
@@ -30,6 +31,8 @@ private:
     QHash<QString, QLineEdit*> *configLineEditMap;
     QStringList *configOptionsKeys;
     QStringList *configOptions;
+    void saveSetting();
+    QLabel *currentConfigCheckDisplay;
 };
 
 #endif // SETTINGS_H

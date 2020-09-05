@@ -97,6 +97,7 @@ void Settings::selectSettings(QSettings *selectedSettings){
 }
 
 void Settings::checkConfig(){
+    saveSetting();
     ServerConnection *sc = new ServerConnection(this, mySettings);
     connect(sc->getNetworkManager(), SIGNAL(finished(QNetworkReply*)), this, SLOT(handleTestConnectionResult(QNetworkReply*)));
     sc->queryServerVersion();
@@ -134,6 +135,8 @@ void Settings::handleTestConnectionResult(QNetworkReply* reply){
 
     auto cw = this->findChild<QWidget*>("centralwidget");
     QGridLayout *layout = static_cast<QGridLayout*>(cw->layout());
+    delete currentConfigCheckDisplay; //this removes it from the layout
+    currentConfigCheckDisplay = testResult;
     layout->addWidget(testResult, configOptions->length(), 1);
 }
 
@@ -144,14 +147,18 @@ void Settings::cancleClose(){
     this->close();
 }
 
-void Settings::okClose(){
+void Settings::saveSetting(){
     QSettings mySettings;
     for(auto key : configLineEditMap->keys()){
-        QString input = configLineEditMap->take(key)->text();
+        QString input = configLineEditMap->value(key)->text();
         if(input.compare("") != 0){
             this->mySettings->setValue(key, input);
         }
     }
+}
+
+void Settings::okClose(){
+    saveSetting();
     this->close();
 }
 
