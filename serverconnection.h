@@ -17,10 +17,11 @@ public:
     QNetworkAccessManager *getNetworkManager();
     void queryServerVersion();
     void getPostProcessorMap();
-    void submitPostProcessorChange(QJsonDocument jsonDocument);
-    void submitSpeechContextPhraseChange(QJsonDocument jsonDocument);
+    void submitPostProcessorChange(QString keyword, QString repl, bool remove = false);
+    void submitSpeechContextPhraseChange(QString phrase, bool remove = false);
     void getSpeechContextPhrases();
     void getUnifiedServerConfig();
+    QString buildURLFromLocation(const char *location);
 public slots:
     void queryStatusAll();
 private slots:

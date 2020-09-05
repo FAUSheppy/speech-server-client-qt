@@ -22,6 +22,10 @@ QString ServerConnection::buildURLFromLocation(QVariant location){
     return buildURLFromLocation(location.toString());
 }
 
+QString ServerConnection::buildURLFromLocation(const char *location){
+    return buildURLFromLocation(QString(location));
+}
+
 QString ServerConnection::buildURLFromLocation(QString location){
     QString proto = mySettings->value(SETTING_PROTO).toString();
     QString host = mySettings->value(SETTING_HOST).toString();
@@ -90,18 +94,39 @@ QNetworkAccessManager *ServerConnection::getNetworkManager(){
     return networkManager;
 }
 
-void ServerConnection::submitPostProcessorChange(QJsonDocument jsonDocument){
+void ServerConnection::submitPostProcessorChange(QString keyword, QString repl, bool remove){
+
+    QJsonObject json = QJsonObject();
+    json["keyword-regex"] = keyword;
+    json["replacement"] = repl;
+    if(remove){
+        json["action"] = "delete";
+    }else{
+        json["action"] = "add";
+    }
+
     QUrl serviceUrl = QUrl(buildURLFromLocation(QString(PP_EDIT)));
     QNetworkRequest request(serviceUrl);
     request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
-    networkManager->post(request, jsonDocument.toJson());
+    request.setHeader(QNetworkRequest::ContentTypeHeader, MIME_JSON);
+    networkManager->post(request, QJsonDocument(json).toJson());
 }
 
-void ServerConnection::submitSpeechContextPhraseChange(QJsonDocument jsonDocument){
+void ServerConnection::submitSpeechContextPhraseChange(QString phrase, bool remove){
+
+    QJsonObject json = QJsonObject();
+    json["phrase"] = phrase;
+    if(remove){
+        json["action"] = "delete";
+    }else{
+        json["action"] = "add";
+    }
+
     QUrl serviceUrl = QUrl(buildURLFromLocation(QString(CONTEXT_EDIT)));
     QNetworkRequest request(serviceUrl);
     request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
-    networkManager->post(request, jsonDocument.toJson());
+    request.setHeader(QNetworkRequest::ContentTypeHeader, MIME_JSON);
+    networkManager->post(request, QJsonDocument(json).toJson());
 }
 
 void ServerConnection::getSpeechContextPhrases(){

@@ -38,7 +38,8 @@ SOURCES += \
     settings.cpp \
     about.cpp \
     serverconnection.cpp \
-    serverconfig.cpp
+    serverconfig.cpp \
+    multivalueinputdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -48,7 +49,8 @@ HEADERS += \
     about.h \
     serverconnection.h \
     serverconfig.h \
-    urls.h
+    urls.h \
+    multivalueinputdialog.h
 
 FORMS += \
         mainwindow.ui \

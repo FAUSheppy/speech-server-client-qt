@@ -1,6 +1,8 @@
 #ifndef SERVERCONFIG_H
 #define SERVERCONFIG_H
 
+#include "serverconnection.h"
+
 #include <QGridLayout>
 #include <QMainWindow>
 #include <QNetworkReply>
@@ -19,12 +21,15 @@ public:
     virtual ~ServerConfig();
 private slots:
     void finishedRequest(QNetworkReply*);
+    void addNewPP();
+    void addNewContext();
 private:
     QGridLayout* mainLayout;
     QSettings* mySettings;
     QWidget *loatListItemUiForm();
     QTableWidget* ppTable;
     QTableWidget* contextTable;
+    ServerConnection* sc;
 };
 
 #endif // SERVERCONFIG_H
