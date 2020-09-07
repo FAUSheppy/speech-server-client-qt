@@ -23,6 +23,8 @@ private slots:
     void finishedRequest(QNetworkReply*);
     void addNewPP();
     void addNewContext();
+    void removePP();
+    void removeContext();
 private:
     QGridLayout* mainLayout;
     QSettings* mySettings;

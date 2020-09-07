@@ -9,6 +9,7 @@
 
 #include "multivalueinputdialog.h"
 #include "urls.h"
+#include "pushbuttonwithposition.h"
 
 ServerConfig::ServerConfig(QWidget *parent, QSettings *settings) : QMainWindow(parent) {
 
@@ -76,6 +77,19 @@ ServerConfig::ServerConfig(QWidget *parent, QSettings *settings) : QMainWindow(p
     QWidget *mainWidget = new QWidget(this);
     mainWidget->setLayout(mainLayout);
     this->setCentralWidget(mainWidget);
+}
+
+void ServerConfig::removePP(){
+    PushButtonWithPosition* pButton = static_cast<PushButtonWithPosition*>(sender());
+    auto key = ppTable->item(pButton->row, 0);
+    auto repl = ppTable->item(pButton->row, 1);
+    sc->submitPostProcessorChange(key->text(), repl->text(), true);
+}
+
+void ServerConfig::removeContext(){
+    PushButtonWithPosition* pButton = static_cast<PushButtonWithPosition*>(sender());
+    auto label = contextTable->item(pButton->row, 0);
+    sc->submitSpeechContextPhraseChange(label->text(), true);
 }
 
 void ServerConfig::addNewPP(){
@@ -185,7 +199,9 @@ void ServerConfig::finishedRequest(QNetworkReply *reply){
             contextTable->setItem(i, 0, new QTableWidgetItem(phrases.at(i).toString()));
             auto *deleteButtonLayout = new QGridLayout();
             auto *deleteCell = new QWidget();
-            auto *deleteButton = new QPushButton("Entfernen");
+            auto *deleteButton = new PushButtonWithPosition(i, "Entfernen");
+            connect(deleteButton, SIGNAL (released()), this, SLOT (removeContext()));
+
             deleteButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
             deleteButtonLayout->addWidget(deleteButton);
             deleteButtonLayout->setContentsMargins(0,0,0,0);
@@ -201,7 +217,9 @@ void ServerConfig::finishedRequest(QNetworkReply *reply){
             ppTable->setItem(i, 1, new QTableWidgetItem(keywordMap[key].toString()));
             auto *deleteButtonLayout = new QGridLayout();
             auto *deleteCell = new QWidget();
-            auto *deleteButton = new QPushButton("Entfernen");
+            auto *deleteButton = new PushButtonWithPosition(i, "Entfernen");
+            connect(deleteButton, SIGNAL (released()), this, SLOT (removePP()));
+
             deleteButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
             deleteButtonLayout->addWidget(deleteButton);
             deleteButtonLayout->setContentsMargins(0,0,0,0);

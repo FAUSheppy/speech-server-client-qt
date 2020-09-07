@@ -39,7 +39,8 @@ SOURCES += \
     about.cpp \
     serverconnection.cpp \
     serverconfig.cpp \
-    multivalueinputdialog.cpp
+    multivalueinputdialog.cpp \
+    pushbuttonwithposition.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -50,7 +51,8 @@ HEADERS += \
     serverconnection.h \
     serverconfig.h \
     urls.h \
-    multivalueinputdialog.h
+    multivalueinputdialog.h \
+    pushbuttonwithposition.h
 
 FORMS += \
         mainwindow.ui \
