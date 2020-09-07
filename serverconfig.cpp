@@ -99,6 +99,16 @@ void ServerConfig::addNewPP(){
     }
 }
 
+void ServerConfig::askFlushServerCache(){
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Server Cache",
+               "Sollen alte Transcripte auf dem Server, die ohne diese Konfiguration erstellt wurden gelöscht werden?",
+               QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        sc->flushCache();
+    }
+}
+
 void ServerConfig::addNewContext()
 {
     QStringList *sl = new QStringList();
@@ -112,6 +122,7 @@ void ServerConfig::addNewContext()
         auto lineEdit = static_cast<QLineEdit*>(wl->at(0));
         if(!lineEdit->text().isEmpty()){
             sc->submitSpeechContextPhraseChange(lineEdit->text());
+            askFlushServerCache();
         }
     }
 }
@@ -137,10 +148,26 @@ void ServerConfig::finishedRequest(QNetworkReply *reply){
 
     QString addPP = sc->buildURLFromLocation(PP_EDIT);
     QString addContext = sc->buildURLFromLocation(CONTEXT_EDIT);
+    QString flushCache = sc->buildURLFromLocation(FLUSH_SERVER_CACHE);
+
     if(QString::compare(reply->url().toString(), addPP) == 0){
         sc->getUnifiedServerConfig();
     }else if(QString::compare(reply->url().toString(), addContext) == 0){
         sc->getUnifiedServerConfig();
+    }else if(QString::compare(reply->url().toString(), flushCache) == 0){
+        qDebug("WTF");
+        QMessageBox msgBox;
+        msgBox.setText("Server Cache Gelöscht");
+        QJsonObject jsonFlushCache = QJsonDocument::fromJson(reply->readAll()).object();
+        QJsonArray removals = jsonFlushCache["removals"].toArray();
+        QString display = "";
+        for(int i = 0; i < removals.size(); i++){
+            display += removals[i].toString();
+            display += "<br>";
+        }
+        msgBox.setInformativeText(display);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
     }else{
         /* this is the unified server config query */
         /* get filename and tracking id from replay */

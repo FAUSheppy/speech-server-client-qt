@@ -22,6 +22,7 @@ public:
     void getSpeechContextPhrases();
     void getUnifiedServerConfig();
     QString buildURLFromLocation(const char *location);
+    void flushCache();
 public slots:
     void queryStatusAll();
 private slots:

@@ -149,3 +149,10 @@ void ServerConnection::getUnifiedServerConfig(){
     request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
     networkManager->get(request);
 }
+
+void ServerConnection::flushCache(){
+    QUrl serviceUrl = QUrl(buildURLFromLocation(QString(FLUSH_SERVER_CACHE)));
+    QNetworkRequest request(serviceUrl);
+    request.setRawHeader(AUTH_HEADER_NAME, authHeaderData);
+    networkManager->get(request);
+}

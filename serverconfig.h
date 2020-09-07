@@ -30,6 +30,7 @@ private:
     QTableWidget* ppTable;
     QTableWidget* contextTable;
     ServerConnection* sc;
+    void askFlushServerCache();
 };
 
 #endif // SERVERCONFIG_H

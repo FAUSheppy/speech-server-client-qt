@@ -10,4 +10,6 @@
 #define UNIFIED_GET "/unified-server-settings"
 #define SERVER_INFO "/server-info"
 
+#define FLUSH_SERVER_CACHE "/flush-cache"
+
 #endif // URLS_H
