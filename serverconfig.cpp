@@ -105,7 +105,7 @@ void ServerConfig::addNewPP(){
     MultiValueInputDialog *dialog = new MultiValueInputDialog(sl, wl);
     if (dialog->exec() == QDialog::Accepted) {
         auto keyword = static_cast<QLineEdit*>(wl->at(0));
-        auto replace = static_cast<QLineEdit*>(wl->at(0));
+        auto replace = static_cast<QLineEdit*>(wl->at(1));
 
         if(!keyword->text().isEmpty() && !replace->text().isEmpty()){
             sc->submitPostProcessorChange(keyword->text(), replace->text());
