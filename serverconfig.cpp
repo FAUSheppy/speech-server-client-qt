@@ -155,7 +155,6 @@ void ServerConfig::finishedRequest(QNetworkReply *reply){
     }else if(QString::compare(reply->url().toString(), addContext) == 0){
         sc->getUnifiedServerConfig();
     }else if(QString::compare(reply->url().toString(), flushCache) == 0){
-        qDebug("WTF");
         QMessageBox msgBox;
         msgBox.setText("Server Cache Gelöscht");
         QJsonObject jsonFlushCache = QJsonDocument::fromJson(reply->readAll()).object();
