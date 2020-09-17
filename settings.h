@@ -1,6 +1,8 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include "serverconnection.h"
+
 #include <QMainWindow>
 #include <QLineEdit>
 #include <QSettings>
@@ -26,6 +28,7 @@ private slots:
     void checkConfig();
     void handleTestConnectionResult(QNetworkReply *reply);
 private:
+    ServerConnection *sc;
     Ui::settings *ui;
     QSettings  *mySettings;
     QHash<QString, QLineEdit*> *configLineEditMap;
