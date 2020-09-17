@@ -53,6 +53,7 @@ Settings::Settings(QWidget *parent) :
     #endif
 
     this->setWindowTitle(SETTINGS_WINDOW_TITLE);
+    currentConfigCheckDisplay = nullptr;
 }
 
 void Settings::selectSettings(QSettings *selectedSettings){
