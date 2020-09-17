@@ -175,7 +175,17 @@ void MainWindow::showNotification(QString str){
 
 void MainWindow::openContainingDir(){
 
-    QString filePath = mySettings->value(SETTING_SAVE_DIR).toString();
+    QString settingPath = mySettings->value(SETTING_SAVE_DIR).toString();
+    QString filePath;
+    if(QString::compare(settingPath, ".") == 0){
+        QPushButton* senderButton = static_cast<QPushButton*>(sender());
+        filePath = senderButton->toolTip();
+        QFileInfo* fi = new QFileInfo(filePath);
+        QDir dirInfo = fi->absoluteDir();
+        filePath = dirInfo.absolutePath();
+    }else{
+        filePath = settingPath;
+    }
     QStringList args;
 
     /* OS specific explorer call */
@@ -259,6 +269,13 @@ void MainWindow::saveTranscript(QNetworkReply* reply){
 
     /* save return data */
     QString fullpath = QDir(mySettings->value(SETTING_SAVE_DIR).toString()).filePath(targetName);
+    QString settingPath = mySettings->value(SETTING_SAVE_DIR).toString();
+    if(QString::compare(settingPath, ".") == 0){
+        fullpath = tw->item(rowId, FILENAME_COL)->text() + ".txt";
+    }else{
+        /* do nothing */
+    }
+
     QFile file(fullpath);
     if (!file.open(QIODevice::WriteOnly)) {
         QMessageBox::information(this, tr("Unable to open file"), file.errorString());
@@ -316,6 +333,7 @@ void MainWindow::addTrackingToList(QNetworkReply* reply){
     auto *openDirCellContent = new QWidget();
     openDirLayout->addWidget(dirButton);
     dirButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    dirButton->setToolTip(filename);
     openDirLayout->setContentsMargins(0,0,0,0);
     openDirCellContent->setLayout(openDirLayout);
 
