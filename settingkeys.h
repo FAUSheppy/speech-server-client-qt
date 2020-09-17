@@ -11,5 +11,6 @@
 #define SETTING_USER            "user"
 #define SETTING_PASS            "pass"
 #define SETTING_LINUX_EXPLORER  "linux-explorer"
+#define SETTING_MOST_RECENT_PATH "most-recent-path"
 
 #endif // SETTINGKEYS_H

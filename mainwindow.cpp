@@ -148,11 +148,23 @@ void MainWindow::handleInitialSettings(){
 }
 
 void MainWindow::importFile(){
+
+    QString startDir = QDir::currentPath();
+    if(mySettings->contains(SETTING_MOST_RECENT_PATH)){
+        startDir = mySettings->value(SETTING_MOST_RECENT_PATH).toString();
+    }
+
     QString filename =  QFileDialog::getOpenFileName(
                 this,
                 "Open Document",
-                QDir::currentPath(),
+                startDir,
                 "All files (*.*) ;; Document files (*.doc *.rtf);; PNG files (*.png)");
+
+    /* set most recent path */
+    QFileInfo* fi = new QFileInfo(filename);
+    QDir dirInfo = fi->absoluteDir();
+    QString dirPath = dirInfo.absolutePath();
+    mySettings->setValue(SETTING_MOST_RECENT_PATH, dirPath);
 
     if(filename.isNull()){
         return;

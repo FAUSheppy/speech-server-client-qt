@@ -7,5 +7,9 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
+    a.setApplicationName("Speech-To-Text");
+    a.setOrganizationName("Lantia IT");
+    a.setOrganizationDomain("lantia-it.de");
+
     return a.exec();
 }
