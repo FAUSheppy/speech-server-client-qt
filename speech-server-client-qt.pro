@@ -57,7 +57,8 @@ HEADERS += \
 FORMS += \
         mainwindow.ui \
     listItemServeConfig.ui \
-    serverconfigitem.ui
+    serverconfigitem.ui \
+    settings.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
