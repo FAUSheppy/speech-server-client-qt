@@ -1,3 +1,7 @@
 *.user
 *.stash
+*.o
+moc_*
+ui_*
 Makefile
+speech-server-client-qt
