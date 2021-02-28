@@ -23,6 +23,7 @@
 #include <QString>
 #include <settingkeys.h>
 #include <serverconnection.h>
+#include "urls.h"
 
 #define FILENAME_COL          0
 #define TRACKING_ID_COL       1
@@ -55,6 +56,9 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     /* setup buttons */
     button = ui->centralWidget->findChild<QPushButton*>("pushButton");
     connect(button, SIGNAL (released()), this, SLOT (importFile()));
+
+    flushCacheButton = ui->centralWidget->findChild<QPushButton*>("flushCacheButton");
+    connect(flushCacheButton, SIGNAL (released()), this, SLOT (flushServerCacheRequest()));
 
     /* table ui */
     tw = ui->centralWidget->findChild<QTableWidget*>("tableWidget");
@@ -390,11 +394,19 @@ void MainWindow::submitFileSlot(QString filename){
     qDebug("Request submission requested");
 }
 
+void MainWindow::flushServerCacheRequest(){
+    connect(serverConnection->getNetworkManager(), SIGNAL(finished(QNetworkReply*)), this,
+            SLOT(requestFinished(QNetworkReply*)), Qt::UniqueConnection);
+    qDebug("Req server flush");
+    serverConnection->flushCache();
+}
+
 void MainWindow::requestFinished(QNetworkReply *reply){
 
     QString submitUrl = serverConnection->buildURLFromLocation(mySettings->value(SETTING_LOC_SUBMIT));
     QString statusRequestUrl = serverConnection->buildURLFromLocation(mySettings->value(SETTING_LOC_STATE));
     QString requestTranscriptUrl = serverConnection->buildURLFromLocation(mySettings->value(SETTING_LOC_TRANSCRIPT));
+    QString flushCacheUrl = serverConnection->buildURLFromLocation(QString(FLUSH_SERVER_CACHE));
 
     if(QString::compare(reply->url().toString(), submitUrl) == 0){
         addTrackingToList(reply);
@@ -403,6 +415,9 @@ void MainWindow::requestFinished(QNetworkReply *reply){
     }else if (reply->url().toString().startsWith(requestTranscriptUrl)) {
         qDebug("Saving transcript");
         saveTranscript(reply);
+    }else if (reply->url().toString().startsWith(flushCacheUrl)) {
+        showNotification("Server um Cache-Löschung gebeten.");
+        qDebug("CacheFlushed");
     }else{
         qDebug("URL-Response: %s", qUtf8Printable(reply->url().toString()));
         qFatal("Unexpected responding URL");

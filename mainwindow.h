@@ -30,10 +30,12 @@ private slots:
     void appyConfigChanges();
     void openAboutWindow();
     void openSpeechConfigWindow();
+    void flushServerCacheRequest();
 private:
     Ui::MainWindow *ui;
     QTableWidget *tw;
     QPushButton *button;
+    QPushButton *flushCacheButton;
     QAction *standardsMenu;
     QSettings *mySettings;
     ServerConnection *serverConnection;
