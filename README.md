@@ -1,7 +1,7 @@
 # Intro
 This is the GUI Interface to a proprietary server that interfaces with speech recognition backends.
 
-![GUI Main-Window](https://media.atlantishq.de/qt_client.png)
+![GUI Main-Window](https://media.atlantishq.de/pictures/qt_client.png)
 
 # Build on Linux
 This is a qt-creator project and can be imported as such. To build for Windows (on Linux) you need [MXE](https://github.com/mxe/mxe.git).
