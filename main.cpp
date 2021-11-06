@@ -8,8 +8,8 @@ int main(int argc, char *argv[])
     w.show();
 
     a.setApplicationName("Speech-To-Text");
-    a.setOrganizationName("Lantia IT");
-    a.setOrganizationDomain("lantia-it.de");
+    a.setOrganizationName("Potaris IT | Yannik Schmidt");
+    a.setOrganizationDomain("potaris.de");
 
     return a.exec();
 }
