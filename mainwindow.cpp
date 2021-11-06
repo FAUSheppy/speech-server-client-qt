@@ -181,7 +181,7 @@ void MainWindow::showNotification(QString str){
 
     auto popUp = new NotificationWidget(this);
     popUp->setPopupText(str);
-    popUp->setGeometry(0, 0, popUp->width(), popUp->height());
+    popUp->setGeometry(200, 100, popUp->width(), popUp->height());
     popUp->show();
     auto *timer = new QTimer();
     connect(timer, SIGNAL(timeout()), popUp, SLOT(fadeOut()));
