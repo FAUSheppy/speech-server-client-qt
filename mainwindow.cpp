@@ -158,22 +158,27 @@ void MainWindow::importFile(){
         startDir = mySettings->value(SETTING_MOST_RECENT_PATH).toString();
     }
 
-    QString filename =  QFileDialog::getOpenFileName(
+    QStringList filenames =  QFileDialog::getOpenFileNames(
                 this,
                 "Open Document",
                 startDir,
                 "All files (*.*) ;; Document files (*.doc *.rtf);; PNG files (*.png)");
 
-    /* set most recent path */
-    QFileInfo* fi = new QFileInfo(filename);
-    QDir dirInfo = fi->absoluteDir();
-    QString dirPath = dirInfo.absolutePath();
-    mySettings->setValue(SETTING_MOST_RECENT_PATH, dirPath);
 
-    if(filename.isNull()){
+    if(filenames.empty()){
         return;
     }else{
-        this->submitFileSlot(filename);
+        for(int i = 0; i<filenames.length(); i++){
+            if(i == 0){
+                /* set most recent path */
+                QFileInfo* fi = new QFileInfo(filenames[i]);
+                QDir dirInfo = fi->absoluteDir();
+                QString dirPath = dirInfo.absolutePath();
+                mySettings->setValue(SETTING_MOST_RECENT_PATH, dirPath);
+            }
+
+            this->submitFileSlot(filenames[i]);
+        }
     }
 }
 
