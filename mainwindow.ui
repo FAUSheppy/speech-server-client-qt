@@ -511,14 +511,6 @@ QCheckBox::indicator:disabled, QRadioButton::indicator:disabled
    </widget>
    <addaction name="menuKonfiguration"/>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
   <action name="actionServer">
    <property name="text">
     <string>&amp;Server</string>
