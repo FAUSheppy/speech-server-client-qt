@@ -10,6 +10,5 @@ int main(int argc, char *argv[])
     a.setApplicationName("Speech-To-Text");
     a.setOrganizationName("Potaris IT | Yannik Schmidt");
     a.setOrganizationDomain("potaris.de");
-
     return a.exec();
 }
