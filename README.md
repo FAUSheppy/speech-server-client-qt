@@ -27,3 +27,6 @@ If you want to build this project on windows, you need change the way this proje
 
 # Build for Mac
 This project does not currently support Mac.
+
+# Stylesheet
+The stylesheet used is "Qt dark orange" by [LoneWolf](https://discourse.techart.online/t/release-qt-dark-orange-stylesheet/2287#post14381).
