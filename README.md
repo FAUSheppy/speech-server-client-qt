@@ -22,11 +22,8 @@ Setup the actual compilation enviroment:
 
 Also check the ``cross_compile.sh`` file in this project.
 
-# Build on Windows
-If you want to build this project on windows, you need change the way this project determines some of it's defines in the project file.
-
-# Build for Mac
-This project does not currently support Mac.
+# Mac Support?
+I do not own a Mac, so I haven't tried, but there is no reason why it wouldn't run on a Mac.
 
 # Stylesheet
 The stylesheet used is "Qt dark orange" by [LoneWolf](https://discourse.techart.online/t/release-qt-dark-orange-stylesheet/2287#post14381).
