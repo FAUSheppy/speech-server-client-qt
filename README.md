@@ -1,6 +1,10 @@
 # Intro
 This is the GUI Interface to a proprietary server that interfaces with speech recognition backends.
 
+# Dependencies
+
+    apt-get install libqt5gui5
+
 ![GUI Main-Window](https://media.atlantishq.de/pictures/qt_client_dm.png)
 
 # Build on Linux
